@@ -75,7 +75,11 @@ Cada registro del dataset contiene los siguientes campos:
 
 ```bash
 python >= 3.9
-pip install requests pandas beautifulsoup4 lxml
+Para reproducir el proceso de extracción o generar nuevamente el dataset, instala las dependencias indicadas en el archivo `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+
 ```
 
 ---
