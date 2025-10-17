@@ -35,28 +35,46 @@ Este documento sigue el formato propuesto por *Datasheets for Datasets* (Gebru e
 
 ## ⚙️ Proceso de obtención y transformación
 
-El script `boe_sumario_text_json.py` realiza las siguientes etapas:
+The main script `boe_sumario_text_json.py` implements the complete workflow for downloading, parsing, and transforming data from the Official Spanish Government Gazette (BOE), using the official BOE Open Data API.
 
-1. **Descarga diaria del sumario del BOE** (`/datosabiertos/api/boe/sumario/{YYYYMMDD}`)  
-   Se obtiene el listado estructurado de disposiciones y anuncios de cada fecha.
+1. **Data Retrieval:**
+   Data is obtained directly from the BOE Open Data API:
+   (`/datosabiertos/api/boe/sumario/{YYYYMMDD}`)  
+   For each date in the range (e.g., 2024/01/01 → 2024/12/31), the script requests       the daily BOE summary, which returns a hierarchical XML/JSON structure with the       following nodes
+   - `<sumario>` → Root node containing the full daily summary 
+   - `<metadatos>` → Metadata about the publication (type of issue, publication date)
+   - `<diario>` → Individual BOE issue of that day  
+   - `<seccion>` → Section (e.g., I. General Provisions, II. Authorities and Personnel, III. Other Provisions, IV. Announcements, etc.)  
+   - `<departamento>` → Ministry, public institution, or issuing authority  
+   - `<epigrafe>` → Thematic or legal subcategory within each section
+   - `<item>` → Specific document, such as a law, resolution, order, decree, or public notice
 
-2. **Extracción de metadatos:**  
-   Se registran campos como sección, departamento, epígrafe, título e identificador oficial (`BOE-A-XXXX-YYYY`).
+   (Reference: [BOE API documentation, 2024](https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf)).
 
-3. **Obtención del texto principal:**  
-   - Fuente principal: XML oficial (`xml.php?id=...`)  
-   - Fallback: versión HTML (`txt.php?id=...`) cuando el XML no incluye cuerpo textual.  
-   - Se conserva el texto íntegro, **incluyendo firmas y notas editoriales.**
+2. **Metadata Extraction:**  
+   For each item, the script captures structured fields such as section, department, epigraph, title, official identifier (BOE-A-XXXX-YYYY), publication date and reference URLs (url_xml, url_html).
+
+3. **Text Retrieval:**  
+   After metadata extraction, the script attempts to obtain the complete textual body of each BOE document.
+   - Primary source: official XML (`xml.php?id=...`), which usually contains the full legal text in structured form.
+   - Fallback: HTML version (`txt.php?id=...`), sed when the XML lacks a <texto>          section or omits the full content.
+   Full content is preserved (signatures, apprendices, editorial notes).
+   Optionally, text can be truncated (e.g., to 25,000 characters) for lightweight        exploration or storage efficiency 
 
 4. **Normalización y limpieza ligera:**  
-   - Normalización Unicode (NFKC)  
-   - Eliminación de duplicados, espacios y saltos múltiples  
-   - Conversión de fechas y derivación de `mes` y `trimestre`
+   Once text extraction is completed, a series of normalization and enrichment steps     are applied to enhance data quality and analytical usability:
+     - *Unicode normalization (NFKC)*: standardizes characters and encodings for                consistent text representation.
+     - *Whitespace cleanup*: collapses multiple spaces, newlines, and redundant line breaks.
+     - *Deduplication*: removes duplicate entries caused by repeated API retrievals or          content overlaps.
+   
+      - *Temporal derivation*: parses the publication date and automatically derives both  month (*mes*) and quarter (*trimestre*) fields for time-based analysis.
+      - *Coarse thematic classification (tematic)*: assigns a preliminary semantic label       based on keyword detection in the title (e.g., Sanidad, Educación, Economía,          Justicia, etc.), enabling quick exploratory categorization without external             models.
+   These transformations ensure a standardized, machine-readable, and analysis-ready dataset while preserving all essential legal and contextual information
 
-5. **Clasificación temática automática (MVP):**  
-   Basada en palabras clave del título (Sanidad, Educación, Economía, etc.).
-
-6. **Serialización final en formato JSONL**, una línea por disposición, lista para carga directa en Python, R o SQL.
+5. **Serialization and Output:**  
+   After processing, all records are serialized into JSON Lines (JSONL) format, where each line corresponds to one BOE disposition or document.
+   This format facilitates efficient streaming, line-by-line parsing, and direct loading in Python, R, SQL, or big data frameworks.
+   Optionally, output files can be compressed using gzip (.jsonl.gz) for storage efficiency.
 
 ---
 
