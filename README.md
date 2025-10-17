@@ -13,7 +13,7 @@ El dataset ha sido generado de manera transparente y documentada, utilizando el 
 - **Periodo cubierto:** Año **2024** completo  
 - **Formato de salida:** JSON Lines (`.jsonl` o `.jsonl.gz`)  
 - **Granularidad:** 1 registro por disposición o anuncio publicado  
-- **Volumen estimado:** ~15.000–20.000 disposiciones anuales  
+- **Volumen estimado:** ~70.000–80.000 disposiciones anuales  
 - **Idioma:** Español  
 - **Licencia:** Basado en datos públicos del BOE, reutilizables bajo las condiciones de la AEBOE (Resolución de 27 de junio de 2024) y distribuidos bajo licencia CC BY 4.0.
 
