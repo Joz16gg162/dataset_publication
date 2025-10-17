@@ -40,28 +40,26 @@ The main script `boe_sumario_text_json.py` implements the complete workflow for 
 1. **Data Retrieval:**
    Data is obtained directly from the BOE Open Data API:
    (`/datosabiertos/api/boe/sumario/{YYYYMMDD}`)  
-   For each date in the range (e.g., 2024/01/01 → 2024/12/31), the script requests       the daily BOE summary, which returns a hierarchical XML/JSON structure with the       following nodes
+   For each date in the range (e.g., 2024/01/01 → 2024/12/31) of the year 2024, the script requests       the daily BOE summary, which returns a hierarchical XML/JSON structure with the       following nodes
    - `<sumario>` → Root node containing the full daily summary 
    - `<metadatos>` → Metadata about the publication (type of issue, publication date)
    - `<diario>` → Individual BOE issue of that day  
    - `<seccion>` → Section (e.g., I. General Provisions, II. Authorities and Personnel, III. Other Provisions, IV. Announcements, etc.)  
    - `<departamento>` → Ministry, public institution, or issuing authority  
-   - `<epigrafe>` → Thematic or legal subcategory within each section
-   - `<item>` → Specific document, such as a law, resolution, order, decree, or public notice
+   - `<epigrafe>` → Optional thematic grouping under each department (present in sections 1, 2A, 2B, 3, and 5)
+   - `<item>` → Individual document (law, resolution, order, decree, or notice)
+   Each <item> includes its identifier (BOE-A-XXXX-YYYY), title, and canonical URLs for the official XML, HTML, and PDF versions.
 
    (Reference: [BOE API documentation, 2024](https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf)).
 
-2. **Metadata Extraction:**  
-   For each item, the script captures structured fields such as section, department, epigraph, title, official identifier (BOE-A-XXXX-YYYY), publication date and reference URLs (url_xml, url_html).
-
-3. **Text Retrieval:**  
+2. **Text Retrieval:**  
    After metadata extraction, the script attempts to obtain the complete textual body of each BOE document.
    - Primary source: official XML (`xml.php?id=...`), which usually contains the full legal text in structured form.
    - Fallback: HTML version (`txt.php?id=...`), sed when the XML lacks a <texto>          section or omits the full content.
    Full content is preserved (signatures, apprendices, editorial notes).
    Optionally, text can be truncated (e.g., to 25,000 characters) for lightweight        exploration or storage efficiency 
 
-4. **Normalización y limpieza ligera:**  
+3. **Normalización y limpieza ligera:**  
    Once text extraction is completed, a series of normalization and enrichment steps     are applied to enhance data quality and analytical usability:
      - *Unicode normalization (NFKC)*: standardizes characters and encodings for                consistent text representation.
      - *Whitespace cleanup*: collapses multiple spaces, newlines, and redundant line breaks.
@@ -71,7 +69,7 @@ The main script `boe_sumario_text_json.py` implements the complete workflow for 
       - *Coarse thematic classification (tematic)*: assigns a preliminary semantic label       based on keyword detection in the title (e.g., Sanidad, Educación, Economía,          Justicia, etc.), enabling quick exploratory categorization without external             models.
    These transformations ensure a standardized, machine-readable, and analysis-ready dataset while preserving all essential legal and contextual information
 
-5. **Serialization and Output:**  
+4. **Serialization and Output:**  
    After processing, all records are serialized into JSON Lines (JSONL) format, where each line corresponds to one BOE disposition or document.
    This format facilitates efficient streaming, line-by-line parsing, and direct loading in Python, R, SQL, or big data frameworks.
    Optionally, output files can be compressed using gzip (.jsonl.gz) for storage efficiency.
