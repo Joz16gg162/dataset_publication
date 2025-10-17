@@ -1,147 +1,121 @@
-# 📘 Dataset: Disposiciones del Boletín Oficial del Estado (BOE) – Texto estructurado 2024
+# 📘 Dataset: Official State Gazette (BOE) Provisions – Structured Text 2024
 
-Este repositorio contiene el proceso y los datos estructurados del **Boletín Oficial del Estado (BOE)** de España, obtenidos mediante su **API pública de datos abiertos**.  
-El objetivo es construir un **corpus anual en formato JSONL** con información textual y metadatos de cada disposición publicada durante el año 2024, **listo para análisis con IA, PLN o minería de texto**.
+This repository contains the process and structured data from the **Boletín Oficial del Estado (BOE)** of Spain, obtained through its **public open data API**.  
+The goal is to build an **annual corpus in JSONL format** with textual information and metadata for each provision published during 2024, **ready for AI, NLP, or text mining analysis**.
 
-El dataset ha sido generado de manera transparente y documentada, utilizando el script `boe_sumario_text_json.py`, que descarga los sumarios del BOE, extrae el texto completo de cada disposición y lo organiza en un formato limpio, unificado y reutilizable.
-
----
-
-## 🧭 Descripción general
-
-- **Fuente original:** [Agencia Estatal Boletín Oficial del Estado](https://www.boe.es)
-- **Periodo cubierto:** Año **2024** completo  
-- **Formato de salida:** JSON Lines (`.jsonl` o `.jsonl.gz`)  
-- **Granularidad:** 1 registro por disposición o anuncio publicado  
-- **Volumen estimado:** ~70.000–80.000 disposiciones anuales  
-- **Idioma:** Español  
-- **Licencia:** Basado en datos públicos del BOE, reutilizables bajo las condiciones de la AEBOE (Resolución de 27 de junio de 2024) y distribuidos bajo licencia CC BY 4.0.
-
-El corpus resultante permite estudiar **patrones lingüísticos, temáticos y temporales** del BOE, así como desarrollar modelos de **clasificación jurídica, análisis semántico o detección de tendencias normativas**.
+The dataset has been generated transparently and documented using the `boe_sumario_text_json.py` script, which downloads BOE summaries, extracts the full text of each provision, and organizes it into a clean, unified, and reusable format.
 
 ---
 
+## 🧭 Overview
+
+- **Original source:** [Agencia Estatal Boletín Oficial del Estado](https://www.boe.es)
+- **Covered period:** Full year **2024**
+- **Output format:** JSON Lines (`.jsonl` or `.jsonl.gz`)
+- **Granularity:** 1 record per published provision or announcement  
+- **Estimated volume:** ~70,000–80,000 annual provisions  
+- **Language:** Spanish  
+- **License:** Based on public BOE data, reusable under AEBOE conditions (Resolution of June 27, 2024), and distributed under CC BY 4.0.
+
+The resulting corpus allows the study of **linguistic, thematic, and temporal patterns** of the BOE and supports the development of **legal classification, semantic analysis, or regulatory trend detection models**.
+
 ---
 
-## 📘 Documentación del dataset
+## 📘 Dataset documentation
 
-La documentación completa de la estructura del conjunto de datos —incluyendo su estructura detallada, proceso de recolección, transformaciones, clasificación temática y política de mantenimiento— se encuentra en el **datasheet oficial**:
+Full dataset structure documentation — including detailed structure, collection process, transformations, thematic classification, and maintenance policy — is available in the **official datasheet**:
 
-👉 [Ver datasheet completo (data/datasheet_boe_2024.md)](data/datasheet_boe_2024.md)
+👉 [View full datasheet (data/datasheet_boe_2024.md)](data/datasheet_boe_2024.md)
 
-Este documento sigue el formato propuesto por *Datasheets for Datasets* (Gebru et al., 2021) y describe todas las variables, decisiones de diseño y consideraciones éticas o legales asociadas al dataset.
+This document follows the *Datasheets for Datasets* format (Gebru et al., 2021) and describes all variables, design decisions, and ethical or legal considerations associated with the dataset.
 
 ---
 
-## ⚙️ Proceso de obtención y transformación
+## ⚙️ Retrieval and transformation process
 
-The main script `boe_sumario_text_json.py` implements the complete workflow for downloading, parsing, and transforming data from the Official Spanish Government Gazette (BOE), using the official BOE Open Data API.
+The main script `boe_sumario_text_json.py` implements the complete workflow for downloading, parsing, and transforming data from the Official Spanish Government Gazette (BOE) using the official Open Data API.
 
-1. **Data Retrieval:**
+1. **Data Retrieval:**  
    Data is obtained directly from the BOE Open Data API:
    (`/datosabiertos/api/boe/sumario/{YYYYMMDD}`)  
-   For each date in the range (e.g., 2024/01/01 → 2024/12/31) of the year 2024, the script requests       the daily BOE summary, which returns a hierarchical XML/JSON structure with the       following nodes
-   - `<sumario>` → Root node containing the full daily summary 
-   - `<metadatos>` → Metadata about the publication (type of issue, publication date)
-   - `<diario>` → Individual BOE issue of that day  
-   - `<seccion>` → Section (e.g., I. General Provisions, II. Authorities and Personnel, III. Other Provisions, IV. Announcements, etc.)  
+   For each date within the range (e.g., 2024/01/01 → 2024/12/31), the script requests the daily BOE summary, which returns a hierarchical XML/JSON structure with the following nodes:
+   - `<sumario>` → Root node containing the full daily summary  
+   - `<metadatos>` → Metadata about the publication (type of issue, publication date)  
+   - `<diario>` → Daily issue node  
+   - `<seccion>` → Section (I. General Provisions, II. Authorities and Personnel, III. Other Provisions, IV. Announcements, etc.)  
    - `<departamento>` → Ministry, public institution, or issuing authority  
-   - `<epigrafe>` → Optional thematic grouping under each department (present in sections 1, 2A, 2B, 3, and 5)
-   - `<item>` → Individual document (law, resolution, order, decree, or notice)
-   Each <item> includes its identifier (BOE-A-XXXX-YYYY), title, and canonical URLs for the official XML, HTML, and PDF versions.
+   - `<epigrafe>` → Optional thematic grouping (sections 1, 2A, 2B, 3, 5)  
+   - `<item>` → Individual document (law, resolution, order, decree, or notice)  
 
-   (Reference: [BOE API documentation, 2024](https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf)).
+   Each `<item>` includes its identifier (BOE-A-XXXX-YYYY), title, and canonical URLs for XML, HTML, and PDF versions.  
+   (Reference: [BOE API documentation, 2024](https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf))
 
 2. **Text Retrieval:**  
-   After metadata extraction, the script attempts to obtain the complete textual body of each BOE document.
-   - Primary source: official XML (`xml.php?id=...`), which usually contains the full legal text in structured form.
-   - Fallback: HTML version (`txt.php?id=...`), sed when the XML lacks a <texto>          section or omits the full content.
-   Full content is preserved (signatures, apprendices, editorial notes).
-   Optionally, text can be truncated (e.g., to 25,000 characters) for lightweight        exploration or storage efficiency 
+   After metadata extraction, the script obtains the complete text body of each document.  
+   - Primary source: official XML (`xml.php?id=...`)  
+   - Fallback: HTML version (`txt.php?id=...`) when XML lacks `<texto>` content  
+   Full content is preserved (signatures, appendices, editorial notes).  
+   Optionally, text can be truncated (e.g., 25,000 characters) for lightweight exploration or efficiency.
 
-3. **Normalización y limpieza ligera:**  
-   Once text extraction is completed, a series of normalization and enrichment steps     are applied to enhance data quality and analytical usability:
-     - *Unicode normalization (NFKC)*: standardizes characters and encodings for                consistent text representation.
-     - *Whitespace cleanup*: collapses multiple spaces, newlines, and redundant line breaks.
-     - *Deduplication*: removes duplicate entries caused by repeated API retrievals or          content overlaps.
-   
-      - *Temporal derivation*: parses the publication date and automatically derives both  month (*mes*) and quarter (*trimestre*) fields for time-based analysis.
-      - *Coarse thematic classification (tematic)*: assigns a preliminary semantic label       based on keyword detection in the title (e.g., Sanidad, Educación, Economía,          Justicia, etc.), enabling quick exploratory categorization without external             models.
-   These transformations ensure a standardized, machine-readable, and analysis-ready dataset while preserving all essential legal and contextual information
+3. **Normalization and light cleaning:**  
+   Once extraction is complete, normalization and enrichment steps enhance data quality:
+   - *Unicode normalization (NFKC)* for consistent encoding  
+   - *Whitespace cleanup* (removes redundant spaces and breaks)  
+   - *Deduplication* of repeated entries  
+   - *Temporal derivation* (`month`, `quarter` fields)  
+   - *Heuristic classification* (e.g., Health, Education, Economy, Justice) based on title keywords  
 
 4. **Serialization and Output:**  
-   After processing, all records are serialized into JSON Lines (JSONL) format, where each line corresponds to one BOE disposition or document.
-   This format facilitates efficient streaming, line-by-line parsing, and direct loading in Python, R, SQL, or big data frameworks.
-   Optionally, output files can be compressed using gzip (.jsonl.gz) for storage efficiency.
+   All records are serialized into JSON Lines (`.jsonl`), one per document.  
+   Optionally compressed with gzip (`.jsonl.gz`) for efficiency.
 
 ---
 
-## 📄 Estructura de los datos
+## 📄 Data structure
 
-Cada registro del dataset contiene los siguientes campos:
-
-| Campo | Descripción | Ejemplo |
+| Field | Description | Example |
 |--------|--------------|---------|
-| `identificador` | Código oficial de la disposición | `"BOE-A-2024-1234"` |
-| `fecha` | Fecha de publicación | `"2024-01-08"` |
-| `diario_numero` | Número de diario dentro del año | `"7"` |
-| `seccion_codigo` | Código interno de la sección | `"2A"` |
-| `seccion_nombre` | Nombre de la sección oficial | `"II. Autoridades y personal. - A. Nombramientos, situaciones e incidencias"` |
-| `departamento_nombre` | Ministerio u organismo responsable | `"MINISTERIO DE HACIENDA Y FUNCIÓN PÚBLICA"` |
-| `epigrafe_nombre` | Subcategoría o epígrafe temático | `"Nombramientos"` |
-| `titulo` | Título completo de la disposición | `"Resolución de 21 de diciembre de 2023, de la Universidad de Murcia, por la que se nombra Catedráticos..."` |
-| `tematica` | Clasificación temática por palabras clave | `"Educación/Universidad"` |
-| `texto_limpio` | Texto completo de la disposición (extraído del XML/HTML) | `"En virtud de lo establecido en el artículo 15 del Estatuto... Murcia, 1 de enero de 2024..."` |
-| `mes` | Mes de publicación (`YYYY-MM`) | `"2024-01"` |
-| `trimestre` | Trimestre natural (`Q1–Q4`) | `"Q1"` |
-
-> Existen campos de URLs (`url_html`, `url_xml`, `url_pdf`), estos se eliminan del dataset final para reducir tamaño, aunque se conservan durante el proceso de extracción.
+| `identificador` | Official provision code | `"BOE-A-2024-1234"` |
+| `fecha` | Publication date | `"2024-01-08"` |
+| `diario_numero` | Daily issue number | `"7"` |
+| `seccion_codigo` | Section code | `"2A"` |
+| `seccion_nombre` | Section name | `"II. Authorities and Personnel - A. Appointments"` |
+| `departamento_nombre` | Ministry or institution | `"MINISTRY OF FINANCE AND PUBLIC FUNCTION"` |
+| `epigrafe_nombre` | Subcategory | `"Appointments"` |
+| `titulo` | Full title | `"Resolution of December 21, 2023, of the University of Murcia..."` |
+| `tematica` | Thematic classification | `"Education/University"` |
+| `texto_limpio` | Full text extracted from XML/HTML | `"Pursuant to Article 15 of the Statute... Murcia, January 1, 2024..."` |
+| `mes` | Month of publication (`YYYY-MM`) | `"2024-01"` |
+| `trimestre` | Quarter (`Q1–Q4`) | `"Q1"` |
 
 ---
 
-## 🧰 Requisitos
+## 🧰 Requirements
 
 ```bash
 python >= 3.9
-Para reproducir el proceso de extracción o generar nuevamente el dataset, instala las dependencias indicadas en el archivo `requirements.txt`:
-
-```bash
 pip install -r requirements.txt
-
 ```
 
 ---
 
-## 🚀 Ejecución
+## 🚀 Execution
 
-### Ejemplo 1: Descargar solo la base (sin texto)
+### Example 1: Download base only (no text)
 
 ```bash
 python boe_sumario_text_json.py --year 2024 --out-base data/base_2024.jsonl --gzip
 ```
 
-### Ejemplo 2: Descargar también el texto desde el XML
+### Example 2: Download including text
 
 ```bash
 python boe_sumario_text_json.py --year 2024 --out-base data/base_2024_text.jsonl --inline-text --truncate-text 25000 --gzip
 ```
 
-### Parámetros principales
-
-| Parámetro | Descripción |
-|------------|-------------|
-| `--year` | Año a procesar (requerido) |
-| `--out-base` | Ruta de salida del JSONL |
-| `--inline-text` | Descarga y agrega `texto_limpio` |
-| `--truncate-text` | Recorta el texto a N caracteres |
-| `--gzip` | Guarda comprimido (`.jsonl.gz`) |
-| `--max-texts` | Límite opcional de textos (debug) |
-| `--sleep-day` | Pausa entre días (default: 0.10 s) |
-| `--sleep-text` | Pausa entre descargas (default: 0.20 s) |
-
 ---
 
-## 🔍 Ejemplo de registro JSON
+## 🔍 Example JSON record
 
 ```json
 {
@@ -149,12 +123,12 @@ python boe_sumario_text_json.py --year 2024 --out-base data/base_2024_text.jsonl
   "fecha": "2024-01-08",
   "diario_numero": "7",
   "seccion_codigo": "2A",
-  "seccion_nombre": "II. Autoridades y personal. - A. Nombramientos, situaciones e incidencias",
-  "departamento_nombre": "UNIVERSIDADES",
-  "epigrafe_nombre": "Nombramientos",
-  "titulo": "Resolución de 21 de diciembre de 2023, de la Universidad de Murcia...",
-  "tematica": "Educación/Universidad",
-  "texto_limpio": "En virtud de lo establecido... Murcia, 1 de enero de 2024. — El Rector, José Luján Alcaraz.",
+  "seccion_nombre": "II. Authorities and Personnel - A. Appointments",
+  "departamento_nombre": "UNIVERSITIES",
+  "epigrafe_nombre": "Appointments",
+  "titulo": "Resolution of December 21, 2023, of the University of Murcia...",
+  "tematica": "Education/University",
+  "texto_limpio": "Pursuant to the provisions... Murcia, January 1, 2024. — The Rector, José Luján Alcaraz.",
   "mes": "2024-01",
   "trimestre": "Q1"
 }
@@ -162,72 +136,27 @@ python boe_sumario_text_json.py --year 2024 --out-base data/base_2024_text.jsonl
 
 ---
 
-## 📊 Cómo cargar el dataset
+## 🧠 Analytical applications
 
-```python
-import pandas as pd
-
-# JSONL normal
-df = pd.read_json("data/base_2024_text.jsonl", lines=True)
-
-# JSONL comprimido
-df = pd.read_json("data/base_2024_text.jsonl.gz", lines=True, compression="gzip")
-
-print(df.head())
-```
+- **Legal topic classification** (supervised learning or embeddings)  
+- **Automatic summarization** or **entity extraction** (legal NLP)  
+- **Legislative trend analysis** by ministry or quarter  
+- **Thematic frequency** and **legal language** studies  
 
 ---
 
-## 🧠 Posibles usos analíticos
+## ⚖️ License and attribution
 
-- Clasificación de **temas normativos** (aprendizaje supervisado o embeddings)  
-- **Resumen automático** o extracción de entidades (NLP jurídico)  
-- Análisis de **tendencias legislativas** por ministerio o trimestre  
-- Estudio de **frecuencia temática** y **lenguaje jurídico**
+Licensed under Creative Commons Attribution 4.0 International (**CC BY 4.0**).
+You are free to use, modify, and redistribute the code provided in this repository, provided that appropriate credit is given and all applicable laws are respected.
 
----
+Data reference (external resource):
+This repository references or interacts with data derived from the Boletín Oficial del Estado (BOE), obtained via its public Open Data API.
+These data are governed by the “[Condiciones de reutilización](https://www.boe.es/informacion/aviso_legal/index.php#reutilizacion)” established in the Resolución de la Agencia Estatal Boletín Oficial del Estado de 27 de junio de 2024 (Aviso Legal del BOE).
 
-## 📈 Indicadores de ejecución
+“Based on data from the Agencia Estatal Boletín Oficial del Estado (AEBOE).
+This dataset is not official and does not replace the authentic electronic edition of the BOE.”
 
-Durante la descarga y el procesamiento, el script muestra logs como:
-
-```
-[412/15840] Procesando BOE-A-2024-11842...
-✔️ BOE-A-2024-11842 (XML) → 14,236 caracteres | 8.3 docs/min
-```
-
-Esto permite monitorear:
-- Progreso total  
-- Fuente del texto (XML/HTML)  
-- Longitud del texto  
-- Velocidad de procesamiento
-
----
-
-## 🧾 Limitaciones
-
-- No todos los documentos del BOE contienen texto accesible vía XML.  
-- La estructura interna varía según tipo (A, B, C...).  
-- La clasificación temática es **heurística** (basada en palabras clave del título).  
-- Se conserva el texto íntegro, por lo que incluye **firmas, anexos y notas editoriales.**
-
----
-
-## 🧩 Créditos y atribución
-
-- **Datos originales:** Agencia Estatal Boletín Oficial del Estado (AEBOE)  
-- **Licencia de uso:** según condiciones de reutilización del BOE  
-- **Autor del script y dataset:** [Tu nombre o equipo]  
-- **Versión:** 1.0 (Octubre 2025)
-
----
-
-## ⚖️ Licencia y reutilización
-
-Este dataset deriva de información pública del **Boletín Oficial del Estado (BOE)**, obtenida mediante su [API de datos abiertos](https://www.boe.es/datosabiertos/), conforme a la **Resolución de la Agencia Estatal BOE de 27 de junio de 2024**, sobre condiciones de reutilización.
-
-> **Basado en datos de la [Agencia Estatal Boletín Oficial del Estado](https://www.boe.es)**.  
-> Este dataset no tiene carácter oficial ni sustituye a la edición electrónica auténtica del BOE.
-
-La reutilización de este dataset se permite bajo una licencia **CC BY 4.0** (atribución requerida), siempre que se cite la fuente y se respete la normativa aplicable.
+The BOE materials are reused under their own open data terms (non exclusive, free reuse with mandatory source attribution and without implying official status).
+Those terms apply only to the BOE data, not to the code or documentation in this repository.
 
