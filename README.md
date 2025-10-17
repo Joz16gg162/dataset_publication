@@ -21,6 +21,18 @@ El corpus resultante permite estudiar **patrones lingüísticos, temáticos y te
 
 ---
 
+---
+
+## 📘 Documentación del dataset
+
+La documentación completa de la estructura del conjunto de datos —incluyendo su estructura detallada, proceso de recolección, transformaciones, clasificación temática y política de mantenimiento— se encuentra en el **datasheet oficial**:
+
+👉 [Ver datasheet completo (data/datasheet_boe_2024.md)](data/datasheet_boe_2024.md)
+
+Este documento sigue el formato propuesto por *Datasheets for Datasets* (Gebru et al., 2021) y describe todas las variables, decisiones de diseño y consideraciones éticas o legales asociadas al dataset.
+
+---
+
 ## ⚙️ Proceso de obtención y transformación
 
 El script `boe_sumario_text_json.py` realiza las siguientes etapas:
@@ -67,7 +79,7 @@ Cada registro del dataset contiene los siguientes campos:
 | `mes` | Mes de publicación (`YYYY-MM`) | `"2024-01"` |
 | `trimestre` | Trimestre natural (`Q1–Q4`) | `"Q1"` |
 
-> ⚠️ Los campos de URLs (`url_html`, `url_xml`, `url_pdf`) se eliminan del dataset final para reducir tamaño, aunque se conservan durante el proceso de extracción.
+> Existen campos de URLs (`url_html`, `url_xml`, `url_pdf`), estos se eliminan del dataset final para reducir tamaño, aunque se conservan durante el proceso de extracción.
 
 ---
 
