@@ -69,13 +69,3 @@ Coloca el CSV semanal en `data/` (ya incluido en este pack). Si necesitas regene
 
 ### 4) Resultados
 Las figuras se generan en `results/` y se utilizan en la presentación oral.
-
-## Presentación oral (10 minutos)
-Contenido mínimo:
-1. Contexto y dataset.  
-2. Hipótesis y motivación.  
-3. Indicadores calculados.  
-4. Técnicas aplicadas y resultados clave.  
-5. Conclusiones y limitaciones.
-
-Sugerencia: priorizar 4–6 figuras (serie semanal con agosto sombreado, comparación mensual, forecast SARIMAX, χ² y tópicos con mayores residuos, KL/JS de drift).
